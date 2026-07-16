@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# The day's data: the seeded Knowledge Round pool and every Response, including the Names
+# students typed. Real people's names do not belong in the repo — the file lives on the
+# booth laptop and is handed over on a USB stick (ADR-0004). Rebuild it with `npm run seed`.
+/data/
