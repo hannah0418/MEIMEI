@@ -102,6 +102,222 @@
   cursor: not-allowed;
 }
 
+/* ---------------------------------------------------------------- landing */
+
+.mmq .landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.mmq .topnav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 6, 15, 0.9);
+  backdrop-filter: blur(10px);
+}
+.mmq .topnav-inner {
+  max-width: 1500px;
+  margin: auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.mmq .brand,
+.mmq .navlinks button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+.mmq .brand {
+  color: var(--pink2);
+  font-size: 18px;
+}
+.mmq .navlinks {
+  display: flex;
+  gap: 24px;
+}
+.mmq .navlinks button {
+  font-size: 16px;
+  padding: 8px 0;
+}
+.mmq .navlinks button:hover,
+.mmq .navlinks button.active {
+  color: var(--pink2);
+}
+.mmq .nav-start {
+  padding: 10px 16px;
+  font-size: 10px;
+}
+.mmq .home-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+  flex: 1;
+  padding-top: 64px;
+  padding-bottom: 54px;
+}
+.mmq .home-heart {
+  color: var(--pink);
+  font-size: 36px;
+  text-shadow: 0 0 20px var(--pink);
+}
+.mmq .home-title {
+  margin: 8px 0 12px;
+  font-size: clamp(44px, 7vw, 78px);
+  background: linear-gradient(90deg, var(--pink), var(--purple2));
+  background-clip: text;
+  color: transparent;
+}
+.mmq .home-sub {
+  color: var(--purple2);
+  letter-spacing: 3px;
+  font-size: 16px;
+}
+.mmq .home-tag {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 24px;
+  line-height: 1.45;
+}
+.mmq .home-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin: 28px 0;
+}
+.mmq .home-icons span {
+  width: 110px;
+  text-align: center;
+  color: var(--pink2);
+  font-size: 24px;
+}
+.mmq .home-icons small {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.2;
+  margin-top: 6px;
+}
+.mmq .home-actions {
+  display: flex;
+  gap: 14px;
+}
+.mmq .home-credit {
+  color: var(--muted);
+  font-size: 15px;
+}
+.mmq .hero-stage {
+  min-height: 430px;
+  position: relative;
+  background: radial-gradient(circle, rgba(155, 92, 246, 0.2), transparent 65%);
+}
+.mmq .hero-avatar {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 230px;
+  transform: translate(-50%, -45%);
+  filter: drop-shadow(0 0 26px var(--cyan));
+}
+.mmq .star {
+  position: absolute;
+  color: var(--cyan);
+  font-size: 26px;
+  text-shadow: 0 0 12px currentColor;
+}
+.mmq .star.one { top: 10%; left: 12%; }
+.mmq .star.two { top: 20%; right: 12%; color: var(--pink2); }
+.mmq .star.three { bottom: 18%; left: 18%; }
+.mmq .info-page {
+  flex: 1;
+  padding-top: 48px;
+  padding-bottom: 60px;
+}
+.mmq .page-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 36px;
+}
+.mmq .eyebrow {
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.mmq .page-title {
+  color: var(--pink2);
+  font-size: 28px;
+  margin: 18px 0 12px;
+}
+.mmq .page-head p,
+.mmq .step-card p,
+.mmq .persona-card p {
+  color: var(--muted);
+}
+.mmq .steps-grid,
+.mmq .personas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.mmq .step-card,
+.mmq .persona-card {
+  padding: 24px;
+  text-align: center;
+}
+.mmq .step-card b {
+  display: block;
+  color: var(--cyan);
+  font-size: 11px;
+}
+.mmq .step-card > span {
+  display: block;
+  margin: 18px 0;
+  font-size: 30px;
+}
+.mmq .persona-card svg {
+  width: 100px;
+}
+.mmq .persona-card h2 {
+  color: var(--persona-a);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.mmq .persona-card div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.mmq .persona-card div span {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.mmq .page-action {
+  text-align: center;
+  margin-top: 36px;
+}
+.mmq .landing-footer {
+  border-top: 1px solid var(--line-soft);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.mmq .landing-footer b {
+  color: var(--pink2);
+  font-size: 11px;
+}
+
 /* ---------------------------------------------------------------- boards (idle) */
 
 .mmq .boards {
@@ -271,6 +487,12 @@
 .mmq .boards-foot {
   text-align: center;
   padding-top: 24px;
+}
+.mmq .boards-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
 }
 .mmq .credit {
   margin-top: 18px;
@@ -658,8 +880,27 @@
 .mmq .staff-del:active {
   transform: scale(0.9);
 }
+.mmq .staff-actions {
+  display: flex;
+  gap: 10px;
+}
+.mmq .staff-clear {
+  border: 1px solid var(--pink);
+  background: var(--pink);
+  color: #fff;
+}
 
 @media (max-width: 1100px) {
+  .mmq .home-hero {
+    grid-template-columns: 1fr;
+  }
+  .mmq .hero-stage {
+    min-height: 300px;
+  }
+  .mmq .steps-grid,
+  .mmq .personas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .mmq .boards-grid {
     grid-template-columns: 1fr;
   }
@@ -683,5 +924,20 @@
   }
   .mmq .reveal-persona {
     font-size: 32px;
+  }
+}
+
+@media (max-width: 700px) {
+  .mmq .navlinks {
+    display: none;
+  }
+  .mmq .steps-grid,
+  .mmq .personas-grid {
+    grid-template-columns: 1fr;
+  }
+  .mmq .staff-bar,
+  .mmq .staff-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

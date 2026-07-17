@@ -1,0 +1,3 @@
+# MEI MEI runs on Vercel with hosted Postgres
+
+The fair needs a shared, persistent deployment rather than a database tied to one booth laptop. MEI MEI therefore runs on Vercel and stores Responses and Knowledge Questions in one production Neon Postgres database provisioned through Vercel Marketplace, accepting runtime internet availability as a dependency; a local SQLite file cannot persist reliably across Vercel function instances. Preview-database branching is unnecessary for this one-fair deployment. This supersedes ADR-0004's offline SQLite decision, while its no-account constraint remains unchanged.

@@ -1,3 +1,7 @@
+---
+status: superseded by ADR-0009
+---
+
 # MEI MEI runs on one offline booth laptop, on SQLite, with no accounts
 
 MEI MEI exists for a single department org fair: one laptop on a table, students queueing to take the quiz one at a time. That constraint is invisible in the code but decides everything — there is no concurrency (the queue is the lock), and a few hundred Responses across one day. So: no auth, no hosting, and SQLite in a local file rather than a hosted database or a containerised MongoDB.

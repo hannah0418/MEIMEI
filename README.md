@@ -1,78 +1,84 @@
 # MEI MEI
 
-A creativity quiz for the College of Computer Studies, run from one laptop at a department
-org fair. Students answer twelve questions about how they work and are matched to one of
-eight **Personas**; then they answer twelve real CS questions for a **Score** and a place on
-the **Rank Board**.
+MEI MEI is a two-Round creativity and IT/CS quiz for a College of Computer Studies org
+fair. Students match with one of eight **Personas**, earn a Knowledge Round **Score**, and
+join two live boards.
 
-`CONTEXT.md` is the glossary and is authoritative. `docs/adr/` holds the decisions.
+The app runs as one Vercel deployment backed by one Neon Postgres database. `CONTEXT.md`
+defines the domain language; `docs/adr/` records the decisions behind it.
 
-## Before the fair (needs internet, once)
+## Quiz flow
+
+**Home → Name → Persona Round → Knowledge Round → Reveal → Boards**
+
+- Home links to How to Play, Personas, and the live boards.
+- The Persona Round has 12 untimed questions with no correct answers.
+- The Knowledge Round has 12 timed IT/CS questions and produces the Score.
+- An abandoned run writes nothing. The Reveal returns to the boards after 60 seconds.
+
+## Deploy to Vercel
+
+1. Import this repository as a Vercel project.
+2. From the Vercel Marketplace, create and connect a Neon Postgres database. Connect the
+   same database to Production and Development so both receive `DATABASE_URL`.
+3. Add a strong `ADMIN_PASSWORD` to both Vercel environments.
+4. Pull the environment variables and seed the database once:
 
 ```bash
 npm install
-npm run seed     # fetches the Knowledge Round pool from Open Trivia DB
+npx vercel link
+npx vercel env pull .env.local
+npm run seed
 ```
 
-`npm run seed` is the only thing that ever touches the network. It writes the question pool
-into `data/meimei.db`. Re-running it is safe — it will not duplicate rows.
-
-## At the booth (no internet needed)
+5. Deploy from the Vercel dashboard or run:
 
 ```bash
-npm run build
-npm start        # then open http://localhost:3000 and go full-screen (F11)
+npx vercel --prod
 ```
 
-Setup is opening a browser. Nothing to log in to, nothing to orchestrate, and the app never
-calls out to the network at runtime — venue wifi degrades exactly when the booth is busiest.
+`npm run seed` creates both tables and fills the Knowledge Question pool from Open Trivia
+DB. It is safe to rerun: existing question text and curation flags are preserved.
 
-The kiosk runs itself between students: **boards (idle) → START → Name → Persona Round →
-Knowledge Round → Reveal → boards**. The Reveal returns to the boards after sixty seconds,
-and an abandoned half-finished run returns after three minutes without writing anything.
+## Run locally
 
-## Booth staff
-
-**Removing a name from the board** (a slur, or someone typing "Dean Reyes"): press and hold
-the **MEI MEI** title on the boards for two seconds. A ✕ appears on each Rank Board row —
-one tap removes that Response from both boards. Tap **Done** to hide it again. Students
-tapping around during the idle loop will not find it.
-
-**Handing over the data:** the whole day is one file, `data/meimei.db`. Copy it to a USB
-stick. There is no export step.
-
-> ⚠️ **Undecided:** that file contains the Names students typed, which is PII on a laptop
-> that goes home with someone. Low stakes, but the org should decide *before* the fair
-> whether the handed-over copy keeps the Names or strips them, so that it is a decision
-> rather than an accident. Stripping them is `UPDATE responses SET name = '';` on the copy.
-
-## Development
+Local development intentionally uses the same Neon database as production.
 
 ```bash
-npm test         # Vitest — the grading rules and the question-set invariants
-npm run typecheck
+npm install
 npm run dev
 ```
 
-Two things are tested, because both failures they catch are **silent**:
+Open <http://localhost:3000>. Clear test Responses before the fair using Staff Mode.
 
-- `lib/grading.test.ts` — the rules that decide the Persona, the Score and the Rank Board
-  order. A reversed sort key ships looking completely fine.
-- `lib/persona-questions.test.ts` — the authored Persona Round data. A starved Trait makes a
-  Persona unmatchable all day, and the only symptom is an empty bar on the board.
+## Staff Mode
 
-The SQLite insert and the Faction Board count are deliberately not tested — the board on
-screen is the test, and fixtures there would cost more than they catch.
+On the boards, press and hold **MEI MEI** for two seconds, then enter `ADMIN_PASSWORD`.
 
-## Still open
+- **✕** permanently removes one Response from both boards.
+- **Clear Boards** permanently removes every Response, including Names and answers.
+- Knowledge Questions are never removed.
+- Refreshing or closing the tab relocks Staff Mode.
+- If `ADMIN_PASSWORD` is missing or incorrect, the quiz still runs but Staff Mode stays
+  locked.
 
-- **Issue 03 — the twelve Persona Round questions are a draft.** They pass both authoring
-  rules, but they have to sound like the College, and the org has to stand behind them.
-- **Issue 07 — the Knowledge Round pool is not curated.** All 149 questions are live
-  (`curated = 1`). Roughly a third of Open Trivia DB's computer category is date
-  memorisation or gotchas — the "kilobytes in a gigabyte (decimal)" question marks
-  `1000000` correct with `1024` as a trap, and half the department will argue about it at
-  your own table. Curating to ~50 (near 40% easy / 45% medium / 15% hard) is an afternoon
-  with the org: `UPDATE knowledge_questions SET curated = 0 WHERE id = ...`.
+## Fair-day setup
 
-Questions from [Open Trivia DB](https://opentdb.com), CC BY-SA 4.0.
+1. Open the production Vercel URL on the booth laptop.
+2. Enter full-screen mode.
+3. Confirm the boards load and complete one test Response.
+4. Clear the test Response before students begin.
+
+The booth needs internet access because both Vercel and Neon are hosted services.
+
+## Checks
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Questions come from [Open Trivia DB](https://opentdb.com), CC BY-SA 4.0. Persona Round
+wording and Knowledge Question curation still require final review by the organization.

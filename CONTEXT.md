@@ -54,6 +54,10 @@ _Avoid_: leaderboard, rankings, scoreboard
 Names ranked by Score. The only ranking of students in MEI MEI, and it ranks them on Knowledge Round answers alone — never on their Persona.
 _Avoid_: leaderboard, high scores, top players
 
+**Staff Mode**:
+The password-protected state where booth staff can delete one Response or clear all Responses. It changes moderation controls, not quiz participation.
+_Avoid_: admin panel, manage mode, dashboard
+
 **Creativity Pattern**:
 Retired. An earlier four-bucket model (logic, design, leadership, expression) that could not express the eight Personas — half the roster fell outside it. Personas are matched from Traits directly, with no intermediate bucket.
 _Avoid_: pattern, category, bucket, quadrant

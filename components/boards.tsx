@@ -1,8 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { removeResponse } from "@/app/actions";
+import { clearBoards, removeResponse, unlockStaff } from "@/app/actions";
 import type { FactionBoardRow, RankBoardRow } from "@/lib/db";
 import type { PersonaId } from "@/lib/personas";
 
@@ -27,6 +28,7 @@ export function Boards({
   data,
   highlightId,
   highlightPersonaId,
+  onHome,
   onStart,
 }: {
   data: BoardsData;
@@ -38,15 +40,23 @@ export function Boards({
    * Team's bar grow: that is the payoff for answering honestly.
    */
   highlightPersonaId?: PersonaId;
+  onHome: () => void;
   onStart: () => void;
 }) {
-  const [staffMode, setStaffMode] = useState(false);
+  const router = useRouter();
+  const [staffPassword, setStaffPassword] = useState<string>();
   const holdTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const staffMode = staffPassword !== undefined;
 
-  // Staff reach the delete affordance by holding the title down; students tapping around
-  // during the idle loop never find it. Nothing about it is on screen until it is on.
+  const openStaffMode = async () => {
+    const password = window.prompt("Staff password");
+    if (password === null) return;
+    if (await unlockStaff(password)) setStaffPassword(password);
+    else window.alert("Incorrect staff password.");
+  };
+
   const startHold = () => {
-    holdTimer.current = setTimeout(() => setStaffMode(true), STAFF_HOLD_MS);
+    holdTimer.current = setTimeout(() => void openStaffMode(), STAFF_HOLD_MS);
   };
   const cancelHold = () => clearTimeout(holdTimer.current);
 
@@ -74,9 +84,22 @@ export function Boards({
       {staffMode && (
         <div className="staff-bar">
           <span>Staff mode — tap ✕ to remove a Response. One tap, gone.</span>
-          <button className="btn btn-ghost" onClick={() => setStaffMode(false)}>
-            Done
-          </button>
+          <div className="staff-actions">
+            <button
+              className="btn staff-clear"
+              onClick={async () => {
+                if (!window.confirm("Permanently delete every Response and clear both boards?"))
+                  return;
+                await clearBoards(staffPassword);
+                router.refresh();
+              }}
+            >
+              Clear Boards
+            </button>
+            <button className="btn btn-ghost" onClick={() => setStaffPassword(undefined)}>
+              Done
+            </button>
+          </div>
         </div>
       )}
 
@@ -149,7 +172,10 @@ export function Boards({
                 <button
                   className="staff-del"
                   aria-label={`Remove ${row.name}`}
-                  onClick={() => removeResponse(row.id)}
+                  onClick={async () => {
+                    await removeResponse(row.id, staffPassword);
+                    router.refresh();
+                  }}
                 >
                   ✕
                 </button>
@@ -160,9 +186,14 @@ export function Boards({
       </div>
 
       <div className="boards-foot">
-        <button className="btn btn-primary start-btn" onClick={onStart}>
-          START
-        </button>
+        <div className="boards-actions">
+          <button className="btn btn-ghost" onClick={onHome}>
+            Home
+          </button>
+          <button className="btn btn-primary start-btn" onClick={onStart}>
+            START
+          </button>
+        </div>
         <p className="credit">
           {totalResponses} played today · Questions from Open Trivia DB (CC BY-SA 4.0)
         </p>

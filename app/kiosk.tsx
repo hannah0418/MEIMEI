@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { startRun, submitResponse, type ServedQuestion } from "@/app/actions";
 import { Boards, type BoardsData } from "@/components/boards";
 import { KnowledgeRound, type GivenAnswer } from "@/components/knowledge-round";
+import { Landing } from "@/components/landing";
 import { NameEntry } from "@/components/name-entry";
 import { PersonaRound } from "@/components/persona-round";
 import { Reveal } from "@/components/reveal";
@@ -15,14 +16,14 @@ import { personaById, type PersonaId, type Trait } from "@/lib/personas";
 /** How often the idle boards pull fresh standings, so they are live all day. */
 const BOARDS_REFRESH_MS = 15_000;
 
-type Phase = "boards" | "name" | "persona" | "knowledge" | "reveal";
+type Phase = "home" | "boards" | "name" | "persona" | "knowledge" | "reveal";
 
 type Finished = { name: string; personaId: PersonaId; score: number };
 
 /**
  * The loop that runs all day unattended (ADR-0008):
  *
- *   boards (idle) → START → Name → Persona Round → Knowledge Round → Reveal
+ *   Home → START → Name → Persona Round → Knowledge Round → Reveal
  *     → boards with the new entry highlighted → idle
  *
  * The in-progress Response is held here and written once, at the end. An abandoned run
@@ -31,7 +32,7 @@ type Finished = { name: string; personaId: PersonaId; score: number };
 export function Kiosk({ boards }: { boards: BoardsData }) {
   const router = useRouter();
 
-  const [phase, setPhase] = useState<Phase>("boards");
+  const [phase, setPhase] = useState<Phase>("home");
   const [name, setName] = useState("");
   const [personaAnswers, setPersonaAnswers] = useState<{ trait: Trait }[]>([]);
   const [questions, setQuestions] = useState<ServedQuestion[]>([]);
@@ -75,7 +76,7 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
   */
   const [activity, setActivity] = useState(0);
   useEffect(() => {
-    if (phase === "boards" || phase === "knowledge") return;
+    if (phase === "home" || phase === "boards" || phase === "knowledge") return;
 
     const limit = phase === "reveal" ? REVEAL_IDLE_MS : ABANDON_IDLE_MS;
     const idle = setTimeout(toBoards, limit);
@@ -117,6 +118,9 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
 
   const screen = () => {
     switch (phase) {
+      case "home":
+        return <Landing onStart={begin} onBoards={() => setPhase("boards")} />;
+
       case "name":
         return <NameEntry onSubmit={onNamed} />;
 
@@ -149,6 +153,7 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
             data={boards}
             highlightId={highlight?.responseId}
             highlightPersonaId={highlight?.personaId}
+            onHome={() => setPhase("home")}
             onStart={begin}
           />
         );

@@ -1,14 +1,11 @@
 /**
  * Seeds the Knowledge Round pool from Open Trivia DB (ADR-0007).
  *
- * A build-time script. Run it once, on good internet, well before the fair:
+ * A one-time setup script. Run it with Neon's DATABASE_URL, well before the fair:
  *
  *   npm run seed
  *
- * The app never calls this API at runtime, even though the venue has internet. Venue wifi
- * degrades exactly when the booth is busiest, and a fetch failure would put a spinner in
- * front of a student with a queue behind them. Seeding cannot fail at the booth because
- * there is nothing there to fail.
+ * The app never calls Open Trivia DB at runtime. It reads the seeded pool from Neon.
  *
  * Source: category 18 "Science: Computers", no API key. The category reports 192 verified
  * questions, but a third of those are true/false: the Knowledge Round serves four options,
@@ -17,7 +14,11 @@
  * Licence CC BY-SA 4.0; the credit goes on the boards.
  */
 
-import { getDb } from "../lib/db";
+import {
+  knowledgeQuestionCounts,
+  seedKnowledgeQuestion,
+  setupDatabase,
+} from "../lib/db";
 
 const CATEGORY_COMPUTERS = 18;
 /** The API caps a single request at 50 questions. */
@@ -100,36 +101,24 @@ async function fetchAllQuestions(): Promise<ApiQuestion[]> {
 }
 
 async function main() {
+  await setupDatabase();
   console.log("Fetching Science: Computers from Open Trivia DB…");
   const questions = await fetchAllQuestions();
 
-  const db = getDb();
-  // Re-running must not duplicate rows: question text is UNIQUE and this ignores collisions,
-  // so a re-run after a curation pass leaves the curated flags alone.
-  const insert = db.prepare(
-    `INSERT OR IGNORE INTO knowledge_questions
-       (question, correct_answer, incorrect_answers, difficulty)
-     VALUES (?, ?, ?, ?)`,
-  );
-
   let added = 0;
   for (const q of questions) {
-    const result = insert.run(
-      decode(q.question),
-      decode(q.correct_answer),
-      JSON.stringify(q.incorrect_answers.map(decode)),
-      decode(q.difficulty),
-    );
-    if (result.changes > 0) added++;
+    if (
+      await seedKnowledgeQuestion({
+        question: decode(q.question),
+        correctAnswer: decode(q.correct_answer),
+        incorrectAnswers: q.incorrect_answers.map(decode),
+        difficulty: decode(q.difficulty),
+      })
+    )
+      added++;
   }
 
-  const total = (
-    db
-      .prepare(
-        `SELECT difficulty, COUNT(*) AS count FROM knowledge_questions GROUP BY difficulty`,
-      )
-      .all() as { difficulty: string; count: number }[]
-  )
+  const total = (await knowledgeQuestionCounts())
     .map((row) => `${row.difficulty} ${row.count}`)
     .join(", ");
 
