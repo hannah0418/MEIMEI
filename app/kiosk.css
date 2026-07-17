@@ -1,0 +1,687 @@
+/*
+  Kiosk styling. Carries over the arcade/P-pop identity from the original MEI MEI concept
+  page, minus the screens the kiosk loop does not have (no nav, no profile, no sharing —
+  the only thing that leaves the booth is a photograph of the Reveal).
+
+  Runs full-screen on one laptop, touched by one student at a time, and read from across a
+  booth table by students who have not sat down yet.
+*/
+
+:root {
+  --bg: #07060f;
+  --bg2: #0c0a1c;
+  --panel: #120f26;
+  --panel2: #171331;
+  --line: rgba(255, 79, 163, 0.28);
+  --line-soft: rgba(139, 92, 246, 0.22);
+  --pink: #ff2f8e;
+  --pink2: #ff6fb4;
+  --purple: #9b5cf6;
+  --purple2: #b794fa;
+  --cyan: #33e6ff;
+  --text: #efe9ff;
+  --muted: #8f8ab0;
+  --gold: #ffd23f;
+}
+
+.mmq {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(155, 92, 246, 0.16), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(255, 47, 142, 0.14), transparent 40%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), monospace;
+  font-size: 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mmq * {
+  box-sizing: border-box;
+}
+.mmq button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.mmq .pixel {
+  font-family: var(--font-pixel), monospace;
+}
+
+/* Nothing in the kiosk should feel like a document the student can select or drag. */
+.mmq {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mmq input {
+  user-select: text;
+  font-family: inherit;
+}
+
+.mmq .shell {
+  max-width: 1500px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 32px;
+}
+
+.mmq .panel {
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  position: relative;
+}
+
+.mmq .btn {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 14px 24px;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  justify-content: center;
+  transition: transform 0.12s ease;
+}
+.mmq .btn:active {
+  transform: scale(0.97);
+}
+.mmq .btn-primary {
+  background: linear-gradient(90deg, var(--pink), #ff5fa8);
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(255, 47, 142, 0.35);
+  font-family: var(--font-pixel), monospace;
+  font-size: 13px;
+}
+.mmq .btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  color: var(--muted);
+}
+.mmq .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------- boards (idle) */
+
+.mmq .boards {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 0 20px;
+}
+.mmq .boards-head {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.mmq .boards-brand {
+  font-family: var(--font-pixel), monospace;
+  font-size: 34px;
+  background: linear-gradient(90deg, var(--pink), var(--pink2) 40%, var(--purple2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 10px;
+}
+.mmq .boards-sub {
+  color: var(--muted);
+  font-size: 19px;
+}
+
+/*
+  The two boards must read as visibly separate things. If they blur, students take their
+  Persona as a verdict on how good a programmer they are (ADR-0006). Different accent,
+  different shape, different heading — and a rule down the middle.
+*/
+.mmq .boards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  flex: 1;
+  align-items: start;
+}
+.mmq .board {
+  padding: 24px 26px;
+}
+.mmq .board-faction {
+  border-right: 1px dashed var(--line-soft);
+  padding-right: 40px;
+}
+.mmq .board-rank {
+  padding-left: 40px;
+}
+.mmq .board-title {
+  font-family: var(--font-pixel), monospace;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.mmq .board-faction .board-title {
+  color: var(--purple2);
+}
+.mmq .board-rank .board-title {
+  color: var(--gold);
+}
+.mmq .board-note {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.mmq .team-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+.mmq .team-emoji {
+  width: 30px;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.mmq .team-name {
+  width: 190px;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.mmq .team-track {
+  flex: 1;
+  height: 22px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.mmq .team-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+  min-width: 3px;
+}
+.mmq .team-count {
+  width: 42px;
+  text-align: right;
+  font-size: 18px;
+  color: var(--text);
+  flex-shrink: 0;
+}
+/* The student's own Team, just after their Reveal — they moved this. */
+.mmq .team-row.grown {
+  background: rgba(255, 47, 142, 0.1);
+  box-shadow: 0 0 0 1px var(--pink) inset;
+  border-radius: 8px;
+  padding: 4px 6px;
+  margin: 0 -6px 7px;
+}
+.mmq .team-row.grown .team-count {
+  color: var(--cyan);
+}
+.mmq .team-row.grown .team-name::before {
+  content: "you → ";
+  color: var(--pink2);
+}
+/* A small Team is rare and desirable, not a failure. */
+.mmq .team-row.rare .team-name::after {
+  content: " ✦";
+  color: var(--gold);
+}
+
+.mmq .rank-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 18px;
+  border-radius: 8px;
+}
+.mmq .rank-row.top .rank-place {
+  color: var(--gold);
+  font-family: var(--font-pixel), monospace;
+  font-size: 12px;
+}
+.mmq .rank-place {
+  width: 30px;
+  text-align: center;
+  color: var(--muted);
+}
+.mmq .rank-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mmq .rank-name .sub {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+.mmq .rank-score {
+  color: var(--cyan);
+  font-size: 19px;
+}
+.mmq .rank-row.you {
+  background: rgba(255, 47, 142, 0.12);
+  box-shadow: 0 0 0 1px var(--pink) inset;
+}
+.mmq .rank-empty {
+  color: var(--muted);
+  font-size: 16px;
+  padding: 14px 8px;
+}
+
+.mmq .boards-foot {
+  text-align: center;
+  padding-top: 24px;
+}
+.mmq .credit {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.mmq .start-btn {
+  font-size: 20px;
+  padding: 22px 60px;
+}
+
+/* ---------------------------------------------------------------- name entry */
+
+.mmq .center-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.mmq .name-card {
+  padding: 44px 40px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+.mmq .name-title {
+  font-family: var(--font-pixel), monospace;
+  font-size: 22px;
+  color: var(--cyan);
+  margin-bottom: 12px;
+}
+.mmq .name-sub {
+  color: var(--muted);
+  margin-bottom: 26px;
+  font-size: 18px;
+}
+.mmq .name-input {
+  width: 100%;
+  padding: 18px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--line-soft);
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 24px;
+  outline: none;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.mmq .name-input:focus {
+  border-color: var(--pink);
+}
+.mmq .name-count {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+/* ---------------------------------------------------------------- rounds */
+
+.mmq .round {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 24px;
+}
+.mmq .round-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+.mmq .round-label {
+  font-family: var(--font-pixel), monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.mmq .round-persona .round-label {
+  color: var(--purple2);
+}
+.mmq .round-knowledge .round-label {
+  color: var(--gold);
+}
+.mmq .round-counter {
+  font-size: 16px;
+  color: var(--muted);
+}
+.mmq .progress-track {
+  display: flex;
+  gap: 5px;
+  margin: 12px 0 22px;
+}
+.mmq .progress-seg {
+  flex: 1;
+  height: 7px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.mmq .round-persona .progress-seg.done {
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+}
+.mmq .round-knowledge .progress-seg.done {
+  background: var(--gold);
+}
+
+/*
+  "No wrong answers here" is not decoration — it is the only thing making the answers
+  honest. A student who thinks they are being marked answers what the department wants to
+  hear, and the Persona data converges on Debug Master and Loop Legend all day (ADR-0006).
+*/
+.mmq .no-wrong {
+  text-align: center;
+  font-family: var(--font-pixel), monospace;
+  font-size: 14px;
+  color: var(--cyan);
+  border: 1px dashed rgba(51, 230, 255, 0.5);
+  background: rgba(51, 230, 255, 0.07);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 22px;
+}
+.mmq .no-wrong span {
+  display: block;
+  font-family: var(--font-body), monospace;
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.mmq .q-text {
+  font-size: 28px;
+  line-height: 1.35;
+  margin-bottom: 24px;
+}
+
+/*
+  Every option looks identical, deliberately. The moment one is styled or ordered to look
+  preferable, the Persona Round is broken.
+*/
+.mmq .opt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg2);
+  font-size: 19px;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  line-height: 1.35;
+}
+.mmq .opt:hover {
+  border-color: var(--purple2);
+}
+.mmq .opt:active {
+  transform: scale(0.995);
+}
+.mmq .opt-letter {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--panel2);
+  border: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--purple2);
+  flex-shrink: 0;
+  font-family: var(--font-pixel), monospace;
+}
+.mmq .opt.picked {
+  border-color: var(--cyan);
+  background: rgba(51, 230, 255, 0.08);
+}
+
+/* The Knowledge Round is the competition, and has to read as a different thing. */
+.mmq .round-knowledge .opt-letter {
+  color: var(--gold);
+}
+.mmq .round-knowledge .opt:hover {
+  border-color: var(--gold);
+}
+.mmq .knowledge-banner {
+  text-align: center;
+  font-family: var(--font-pixel), monospace;
+  font-size: 13px;
+  color: var(--gold);
+  border: 1px solid rgba(255, 210, 63, 0.45);
+  background: rgba(255, 210, 63, 0.07);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 18px;
+}
+.mmq .knowledge-banner span {
+  display: block;
+  font-family: var(--font-body), monospace;
+  font-size: 15px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.mmq .timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mmq .timer-count {
+  font-family: var(--font-pixel), monospace;
+  font-size: 18px;
+  color: var(--gold);
+  width: 34px;
+  text-align: right;
+}
+.mmq .timer-count.low {
+  color: var(--pink);
+}
+.mmq .timer-track {
+  width: 190px;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.mmq .timer-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 1s linear;
+}
+.mmq .timer-fill.low {
+  background: var(--pink);
+}
+
+/* ---------------------------------------------------------------- reveal */
+
+/*
+  The only thing that leaves the booth. Assume a phone camera at an angle under fair
+  lighting: high contrast, big type, no thin greys, nothing important near the edges.
+*/
+.mmq .reveal {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(circle at 50% 30%, var(--reveal-glow), transparent 60%),
+    var(--bg);
+}
+.mmq .reveal-card {
+  width: 100%;
+  max-width: 1000px;
+  padding: 46px 56px;
+  border-radius: 22px;
+  border: 3px solid var(--reveal-a);
+  background: linear-gradient(170deg, #14102b, #0a0818);
+  box-shadow: 0 0 60px var(--reveal-glow);
+  text-align: center;
+}
+.mmq .reveal-name {
+  font-family: var(--font-pixel), monospace;
+  font-size: 40px;
+  color: #fff;
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+.mmq .reveal-eyebrow {
+  font-size: 19px;
+  color: var(--muted);
+  margin-bottom: 26px;
+}
+.mmq .reveal-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 44px;
+}
+.mmq .reveal-avatar svg {
+  width: 190px;
+  height: auto;
+  filter: drop-shadow(0 0 22px var(--reveal-a));
+}
+.mmq .reveal-main {
+  text-align: left;
+  flex: 1;
+}
+.mmq .reveal-persona {
+  font-family: var(--font-pixel), monospace;
+  font-size: 42px;
+  line-height: 1.2;
+  color: var(--reveal-a);
+  margin-bottom: 12px;
+}
+.mmq .reveal-tagline {
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 18px;
+}
+.mmq .descriptors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mmq .descriptor {
+  font-size: 18px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--reveal-a);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/*
+  Persona and Score are two separate facts. A student must not read their Persona as
+  something they earned or were scored on (ADR-0006), so the Score sits behind its own rule
+  with its own label.
+*/
+.mmq .reveal-score {
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 2px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.mmq .reveal-score-label {
+  font-size: 19px;
+  color: #fff;
+}
+.mmq .reveal-score-value {
+  font-family: var(--font-pixel), monospace;
+  font-size: 34px;
+  color: var(--cyan);
+}
+.mmq .reveal-score-note {
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.mmq .reveal-foot {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.mmq .reveal-hint {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- staff */
+
+.mmq .staff-bar {
+  background: rgba(255, 47, 142, 0.14);
+  border: 1px solid var(--pink);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 15px;
+  color: var(--pink2);
+}
+.mmq .staff-del {
+  border: 1px solid var(--pink);
+  background: rgba(255, 47, 142, 0.16);
+  color: #fff;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.mmq .staff-del:active {
+  transform: scale(0.9);
+}
+
+@media (max-width: 1100px) {
+  .mmq .boards-grid {
+    grid-template-columns: 1fr;
+  }
+  .mmq .board-faction {
+    border-right: none;
+    border-bottom: 1px dashed var(--line-soft);
+    padding-right: 26px;
+  }
+  .mmq .board-rank {
+    padding-left: 26px;
+  }
+  .mmq .reveal-body {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .mmq .reveal-main {
+    text-align: center;
+  }
+  .mmq .descriptors {
+    justify-content: center;
+  }
+  .mmq .reveal-persona {
+    font-size: 32px;
+  }
+}
