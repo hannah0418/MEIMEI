@@ -4,8 +4,9 @@ MEI MEI is a two-Round creativity and IT/CS quiz for a College of Computer Studi
 fair. Students match with one of eight **Personas**, earn a Knowledge Round **Score**, and
 join two live boards.
 
-The app runs as one Vercel deployment backed by one Neon Postgres database. `CONTEXT.md`
-defines the domain language; `docs/adr/` records the decisions behind it.
+The app runs either on Vercel or in Docker on the booth Mac, backed by one Neon Postgres
+database. `CONTEXT.md` defines the domain language; `docs/adr/` records the decisions behind
+it.
 
 ## Quiz flow
 
@@ -51,6 +52,31 @@ npm run dev
 
 Open <http://localhost:3000>. Clear test Responses before the fair using Staff Mode.
 
+## Run at the booth with Docker on macOS
+
+Install Docker Desktop, create `.env.local`, and replace both placeholder values:
+
+```bash
+cp .env.example .env.local
+```
+
+Then run:
+
+```bash
+docker compose up --build -d
+```
+
+Open <http://localhost:3000> and enter full-screen mode. The container restarts unless
+stopped and uses the same Neon database as Vercel and local development.
+
+```bash
+docker compose logs -f   # view logs
+docker compose down      # stop after the fair
+```
+
+The image contains only the production Next.js standalone server. Run `npm run seed` before
+fair day; the container does not fetch questions from Open Trivia DB.
+
 ## Staff Mode
 
 On the boards, press and hold **MEI MEI** for two seconds, then enter `ADMIN_PASSWORD`.
@@ -64,12 +90,12 @@ On the boards, press and hold **MEI MEI** for two seconds, then enter `ADMIN_PAS
 
 ## Fair-day setup
 
-1. Open the production Vercel URL on the booth laptop.
+1. Start the app with `docker compose up --build -d`.
 2. Enter full-screen mode.
 3. Confirm the boards load and complete one test Response.
 4. Clear the test Response before students begin.
 
-The booth needs internet access because both Vercel and Neon are hosted services.
+The booth needs internet access because Neon is hosted.
 
 ## Checks
 
