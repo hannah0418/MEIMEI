@@ -42,6 +42,7 @@ export function KnowledgeRound({
   }, []);
 
   const answer = (given: string | null) => {
+    if (answers.current.length > index) return;
     answers.current = [...answers.current, { questionId: question.id, given }];
 
     if (answers.current.length === questions.length) {
