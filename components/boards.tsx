@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-import { removeResponse } from "@/app/actions";
 import type { FactionBoardRow, RankBoardRow } from "@/lib/db";
 import type { PersonaId } from "@/lib/personas";
 
@@ -10,9 +7,6 @@ export type BoardsData = {
   faction: FactionBoardRow[];
   rank: RankBoardRow[];
 };
-
-/** How long staff hold the title before the delete affordance appears. */
-const STAFF_HOLD_MS = 2_000;
 
 /**
  * The app's resting state and the thing that pulls students to the booth (ADR-0008). Not a
@@ -27,6 +21,7 @@ export function Boards({
   data,
   highlightId,
   highlightPersonaId,
+  onHome,
   onStart,
 }: {
   data: BoardsData;
@@ -38,47 +33,20 @@ export function Boards({
    * Team's bar grow: that is the payoff for answering honestly.
    */
   highlightPersonaId?: PersonaId;
+  onHome: () => void;
   onStart: () => void;
 }) {
-  const [staffMode, setStaffMode] = useState(false);
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  // Staff reach the delete affordance by holding the title down; students tapping around
-  // during the idle loop never find it. Nothing about it is on screen until it is on.
-  const startHold = () => {
-    holdTimer.current = setTimeout(() => setStaffMode(true), STAFF_HOLD_MS);
-  };
-  const cancelHold = () => clearTimeout(holdTimer.current);
-
-  useEffect(() => cancelHold, []);
-
   const busiest = Math.max(1, ...data.faction.map((row) => row.count));
   const totalResponses = data.faction.reduce((sum, row) => sum + row.count, 0);
 
   return (
     <div className="boards shell">
       <div className="boards-head">
-        <h1
-          className="boards-brand"
-          onPointerDown={startHold}
-          onPointerUp={cancelHold}
-          onPointerLeave={cancelHold}
-        >
-          MEI MEI
-        </h1>
+        <h1 className="boards-brand">MEI MEI</h1>
         <p className="boards-sub">
           Which one are you? · College of Computer Studies
         </p>
       </div>
-
-      {staffMode && (
-        <div className="staff-bar">
-          <span>Staff mode — tap ✕ to remove a Response. One tap, gone.</span>
-          <button className="btn btn-ghost" onClick={() => setStaffMode(false)}>
-            Done
-          </button>
-        </div>
-      )}
 
       <div className="boards-grid">
         <section className="board board-faction">
@@ -145,24 +113,20 @@ export function Boards({
                 </span>
               </span>
               <span className="rank-score">{row.score}/12</span>
-              {staffMode && (
-                <button
-                  className="staff-del"
-                  aria-label={`Remove ${row.name}`}
-                  onClick={() => removeResponse(row.id)}
-                >
-                  ✕
-                </button>
-              )}
             </div>
           ))}
         </section>
       </div>
 
       <div className="boards-foot">
-        <button className="btn btn-primary start-btn" onClick={onStart}>
-          START
-        </button>
+        <div className="boards-actions">
+          <button className="btn btn-ghost" onClick={onHome}>
+            Home
+          </button>
+          <button className="btn btn-primary start-btn" onClick={onStart}>
+            START
+          </button>
+        </div>
         <p className="credit">
           {totalResponses} played today · Questions from Open Trivia DB (CC BY-SA 4.0)
         </p>

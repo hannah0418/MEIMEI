@@ -1,3 +1,7 @@
+---
+status: amended by ADR-0012
+---
+
 # The boards are the idle screen, and the Reveal times out
 
 MEI MEI runs as a kiosk on one laptop, so the app's resting state is the Faction Board and Rank Board rather than a landing page with a start button. The boards are the only recruiting surface left: there are no phones, no second screen, and no sharing beyond a photograph, so a screen showing live Team standings is what makes a student walk over to the booth — a dormant START button is not. The loop is: boards (idle) → START → Name → Persona Round → Knowledge Round → Reveal → boards with the new entry highlighted → idle.

@@ -6,23 +6,24 @@ import { useCallback, useEffect, useState } from "react";
 import { startRun, submitResponse, type ServedQuestion } from "@/app/actions";
 import { Boards, type BoardsData } from "@/components/boards";
 import { KnowledgeRound, type GivenAnswer } from "@/components/knowledge-round";
+import { Landing } from "@/components/landing";
 import { NameEntry } from "@/components/name-entry";
 import { PersonaRound } from "@/components/persona-round";
 import { Reveal } from "@/components/reveal";
-import { ABANDON_IDLE_MS, REVEAL_IDLE_MS } from "@/lib/constants";
+import { ABANDON_IDLE_MS } from "@/lib/constants";
 import { personaById, type PersonaId, type Trait } from "@/lib/personas";
 
 /** How often the idle boards pull fresh standings, so they are live all day. */
 const BOARDS_REFRESH_MS = 15_000;
 
-type Phase = "boards" | "name" | "persona" | "knowledge" | "reveal";
+type Phase = "home" | "boards" | "name" | "persona" | "knowledge" | "reveal";
 
 type Finished = { name: string; personaId: PersonaId; score: number };
 
 /**
  * The loop that runs all day unattended (ADR-0008):
  *
- *   boards (idle) → START → Name → Persona Round → Knowledge Round → Reveal
+ *   Home → START → Name → Persona Round → Knowledge Round → Reveal
  *     → boards with the new entry highlighted → idle
  *
  * The in-progress Response is held here and written once, at the end. An abandoned run
@@ -31,7 +32,7 @@ type Finished = { name: string; personaId: PersonaId; score: number };
 export function Kiosk({ boards }: { boards: BoardsData }) {
   const router = useRouter();
 
-  const [phase, setPhase] = useState<Phase>("boards");
+  const [phase, setPhase] = useState<Phase>("home");
   const [name, setName] = useState("");
   const [personaAnswers, setPersonaAnswers] = useState<{ trait: Trait }[]>([]);
   const [questions, setQuestions] = useState<ServedQuestion[]>([]);
@@ -57,12 +58,6 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
   }, [phase, router]);
 
   /*
-    Two idle timeouts, for two different problems.
-
-    On the Reveal: students photograph it and walk away without dismissing it, constantly.
-    Without the timeout the next student sits down facing the previous student's Name,
-    Persona and Score, and starts the quiz as them.
-
     On Name and the Persona Round: a student who wanders off halfway would otherwise wedge
     the kiosk on question four for the rest of the day, because nothing else there advances
     on its own. This is not a question timer and is never shown — the Persona Round is
@@ -75,10 +70,9 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
   */
   const [activity, setActivity] = useState(0);
   useEffect(() => {
-    if (phase === "boards" || phase === "knowledge") return;
+    if (phase !== "name" && phase !== "persona") return;
 
-    const limit = phase === "reveal" ? REVEAL_IDLE_MS : ABANDON_IDLE_MS;
-    const idle = setTimeout(toBoards, limit);
+    const idle = setTimeout(toBoards, ABANDON_IDLE_MS);
     return () => clearTimeout(idle);
   }, [phase, activity, toBoards]);
 
@@ -117,6 +111,9 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
 
   const screen = () => {
     switch (phase) {
+      case "home":
+        return <Landing onStart={begin} onBoards={() => setPhase("boards")} />;
+
       case "name":
         return <NameEntry onSubmit={onNamed} />;
 
@@ -149,6 +146,7 @@ export function Kiosk({ boards }: { boards: BoardsData }) {
             data={boards}
             highlightId={highlight?.responseId}
             highlightPersonaId={highlight?.personaId}
+            onHome={() => setPhase("home")}
             onStart={begin}
           />
         );

@@ -11,5 +11,6 @@ import { factionBoard, rankBoard } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  return <Kiosk boards={{ faction: factionBoard(), rank: rankBoard() }} />;
+  const [faction, rank] = await Promise.all([factionBoard(), rankBoard()]);
+  return <Kiosk boards={{ faction, rank }} />;
 }

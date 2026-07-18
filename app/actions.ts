@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { KNOWLEDGE_QUESTION_COUNT, PERSONA_QUESTION_COUNT } from "@/lib/constants";
 import {
+  clearResponses,
   correctAnswersFor,
   deleteResponse,
   drawKnowledgeQuestions,
@@ -12,6 +13,7 @@ import {
 import { gradeResponse } from "@/lib/grading";
 import { PERSONA_QUESTIONS } from "@/lib/persona-questions";
 import { TRAITS, type PersonaId, type Trait } from "@/lib/personas";
+import { isStaffPassword } from "@/lib/staff-auth";
 
 /** A Knowledge Round question as the student sees it: four options, none of them flagged. */
 export type ServedQuestion = {
@@ -38,7 +40,7 @@ function shuffle<T>(items: readonly T[]): T[] {
  * nothing else. Grading happens in submitResponse, against the pool.
  */
 export async function startRun(): Promise<ServedQuestion[]> {
-  return drawKnowledgeQuestions(KNOWLEDGE_QUESTION_COUNT).map((question) => ({
+  return (await drawKnowledgeQuestions(KNOWLEDGE_QUESTION_COUNT)).map((question) => ({
     id: question.id,
     question: question.question,
     options: shuffle([question.correctAnswer, ...question.incorrectAnswers]),
@@ -57,8 +59,8 @@ export type SubmitResult = {
  *
  * Server Functions are reachable by direct POST, not just through the kiosk, so nothing
  * here trusts the caller: the Score is graded from the pool rather than accepted, and the
- * Traits are checked against the authored questions. There is no auth by design (ADR-0004)
- * — a forged Response is a row staff can delete (issue 13), not an exploit.
+ * Traits are checked against the authored questions. Quiz participation has no auth by
+ * design; only destructive Staff Mode actions require the shared password (ADR-0010).
  */
 export async function submitResponse(input: {
   name: string;
@@ -77,7 +79,7 @@ export async function submitResponse(input: {
   }
 
   const given = input.knowledgeAnswers.slice(0, KNOWLEDGE_QUESTION_COUNT);
-  const correct = correctAnswersFor(given.map((answer) => answer.questionId));
+  const correct = await correctAnswersFor(given.map((answer) => answer.questionId));
   const knowledgeAnswers = given.flatMap((answer) => {
     const expected = correct.get(answer.questionId);
     // A question the pool has never heard of scores nothing rather than throwing: a
@@ -87,7 +89,7 @@ export async function submitResponse(input: {
 
   const { persona, score } = gradeResponse({ personaAnswers, knowledgeAnswers });
 
-  const responseId = writeResponse({
+  const responseId = await writeResponse({
     name: input.name,
     personaId: persona.id,
     score,
@@ -103,7 +105,19 @@ export async function submitResponse(input: {
 }
 
 /** Booth staff removing a slur or an impersonated name. One tap, gone — speed is the feature. */
-export async function removeResponse(id: number): Promise<void> {
-  deleteResponse(id);
+export async function unlockStaff(password: string): Promise<boolean> {
+  return isStaffPassword(password);
+}
+
+export async function removeResponse(id: number, password: string): Promise<void> {
+  if (!isStaffPassword(password)) throw new Error("Unauthorized");
+  if (!Number.isInteger(id) || id < 1) throw new Error("Invalid Response id");
+  await deleteResponse(id);
+  revalidatePath("/");
+}
+
+export async function clearBoards(password: string): Promise<void> {
+  if (!isStaffPassword(password)) throw new Error("Unauthorized");
+  await clearResponses();
   revalidatePath("/");
 }
