@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { clearBoards, removeResponse, unlockStaff } from "@/app/actions";
 import type { FactionBoardRow, RankBoardRow } from "@/lib/db";
@@ -11,9 +11,6 @@ export type BoardsData = {
   faction: FactionBoardRow[];
   rank: RankBoardRow[];
 };
-
-/** How long staff hold the title before the delete affordance appears. */
-const STAFF_HOLD_MS = 2_000;
 
 /**
  * The app's resting state and the thing that pulls students to the booth (ADR-0008). Not a
@@ -45,7 +42,6 @@ export function Boards({
 }) {
   const router = useRouter();
   const [staffPassword, setStaffPassword] = useState<string>();
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const staffMode = staffPassword !== undefined;
 
   const openStaffMode = async () => {
@@ -55,27 +51,15 @@ export function Boards({
     else window.alert("Incorrect staff password.");
   };
 
-  const startHold = () => {
-    holdTimer.current = setTimeout(() => void openStaffMode(), STAFF_HOLD_MS);
-  };
-  const cancelHold = () => clearTimeout(holdTimer.current);
-
-  useEffect(() => cancelHold, []);
-
   const busiest = Math.max(1, ...data.faction.map((row) => row.count));
   const totalResponses = data.faction.reduce((sum, row) => sum + row.count, 0);
 
   return (
     <div className="boards shell">
       <div className="boards-head">
-        <h1
-          className="boards-brand"
-          onPointerDown={startHold}
-          onPointerUp={cancelHold}
-          onPointerLeave={cancelHold}
-        >
+        <button type="button" className="boards-brand" onClick={() => void openStaffMode()}>
           MEI MEI
-        </h1>
+        </button>
         <p className="boards-sub">
           Which one are you? · College of Computer Studies
         </p>

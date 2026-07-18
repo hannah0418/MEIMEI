@@ -333,6 +333,9 @@
 .mmq .boards-brand {
   font-family: var(--font-pixel), monospace;
   font-size: 34px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   background: linear-gradient(90deg, var(--pink), var(--pink2) 40%, var(--purple2));
   -webkit-background-clip: text;
   background-clip: text;
